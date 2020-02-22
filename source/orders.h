@@ -6,12 +6,12 @@
 #include <stdbool.h>
 
 int current_floor;
-int current_mission;
+int current_destination;
 
 bool order_inside[HARDWARE_NUMBER_OF_FLOORS];
 bool order_up[HARDWARE_NUMBER_OF_FLOORS]; //kunne vært størrelse floors-1 men pga enklere kode gidd ikke
 bool order_down[HARDWARE_NUMBER_OF_FLOORS];
-//void set_current_mission();
+//void set_current_destination();
 
 
 
@@ -19,7 +19,7 @@ bool order_down[HARDWARE_NUMBER_OF_FLOORS];
  * @brief Checks if there are any new orders and adds them to @c order_inside , @c order_up and @c order_down . Turns on the respective button lights as well.
  * 
  */
-void set_orders();
+void update_orders();
 
 /**
  * @brief Clears order from floor @p floor of type @p order_type. Turns off respective button lights as well.

@@ -5,7 +5,7 @@
 #include "orders.h"
 
 
-void set_orders(){
+void update_orders(){
     for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             /* Internal orders */
             if(hardware_read_order(f, HARDWARE_ORDER_INSIDE)){
