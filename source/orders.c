@@ -5,7 +5,7 @@
 #include "orders.h"
 
 
-void update_orders(){
+void update_orders(bool direction){
     for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             /* Internal orders */
             if(hardware_read_order(f, HARDWARE_ORDER_INSIDE)){
@@ -26,6 +26,25 @@ void update_orders(){
 
             }
         }
+    if (direction){
+        for(int f = HARDWARE_NUMBER_OF_FLOORS - 1; f >= 0; f--){        //setting the first floor that has an order to current destination (counting from the top).
+             if(order_inside[f] || order_down[f] || order_up[f]){
+                current_destination = f;
+                break;
+            }
+            
+        }
+        
+    }
+    else{
+        for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){             //setting the first floor that has an order to current destination (counting from the bottom).
+            if(order_inside[f] || order_down[f] || order_up[f]){
+                current_destination = f;
+                break;
+            }
+            
+        }
+    }
 }
 
 void clear_order(int floor, HardwareOrder order_type){

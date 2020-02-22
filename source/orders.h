@@ -19,7 +19,7 @@ bool order_down[HARDWARE_NUMBER_OF_FLOORS];
  * @brief Checks if there are any new orders and adds them to @c order_inside , @c order_up and @c order_down . Turns on the respective button lights as well.
  * 
  */
-void update_orders();
+void update_orders(bool direction);
 
 /**
  * @brief Clears order from floor @p floor of type @p order_type. Turns off respective button lights as well.
