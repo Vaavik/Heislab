@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <time.h>
 #include "hardware.h"
 #include "orders.h"
 #include "elevator.h"
@@ -91,7 +92,19 @@ int stop_up(){
         HardwareOrder order_type = order_types[i];
         clear_order(current_floor, order_type);
     }
-    //fiks åpne dør her
+
+    hardware_command_door_open(1);  //åpner døra her
+    int sec = 0, trigger = 3;       //timer 3 sek
+    clock_t before = clock();
+    while(sec < trigger){
+        update_orders();            //tar imot ordre samtidig
+
+        clock_t diff = clock() - before;
+        sec = diff/ CLOCKS_PER_SEC;
+    }
+    hardware_command_door_open(0);  //lukker døra her
+
+
     if(current_destination > current_floor){
         state = moving_up_state;
     }
@@ -104,8 +117,8 @@ int stop_up(){
 
 int stop_down(){
     int state;
-    hardware_command_movement(HARDWARE_MOVEMENT_STOP);
-    HardwareOrder order_types[3] = {
+    hardware_command_movement(HARDWARE_MOVEMENT_STOP);  
+    HardwareOrder order_types[3] = {    //clearer alle ordrene til etasjen
         HARDWARE_ORDER_UP,
         HARDWARE_ORDER_INSIDE,
         HARDWARE_ORDER_DOWN
@@ -114,7 +127,19 @@ int stop_down(){
         HardwareOrder order_type = order_types[i];
         clear_order(current_floor, order_type);
     }
-    //fiks åpne dør her
+    
+    hardware_command_door_open(1);  //åpner døra her
+    int sec = 0, trigger = 3;       //timer 3 sek
+    clock_t before = clock();
+    while(sec < trigger){
+        update_orders();            //tar imot ordre samtidig
+
+        clock_t diff = clock() - before;
+        sec = diff/ CLOCKS_PER_SEC;
+    }
+    hardware_command_door_open(0);  //lukker døra her
+
+
     if(current_destination < current_floor){
         state = moving_down_state;
     }
