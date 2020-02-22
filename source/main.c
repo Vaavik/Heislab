@@ -14,6 +14,9 @@ int main(){
 
 
     printf("=== Example Program ===\n");
+    
+    elevator();
+
     printf("Press the stop button on the elevator panel to exit\n");
 
 
@@ -40,7 +43,7 @@ int main(){
         }
 
 
-        set_orders();
+        update_orders();
         for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             if(hardware_read_floor_sensor(f)){
                 clear_order(f, HARDWARE_ORDER_INSIDE);

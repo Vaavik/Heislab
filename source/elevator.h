@@ -8,9 +8,9 @@
 
 int idle();
 
-void moving_up();
+int moving_up();
 
-void moving_down();
+int moving_down();
 
 void stop_up();
 
