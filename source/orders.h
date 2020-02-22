@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 int current_floor;
-int current_destination;
+int current_destination; 
 
 bool order_inside[HARDWARE_NUMBER_OF_FLOORS];
 bool order_up[HARDWARE_NUMBER_OF_FLOORS]; //kunne vært størrelse floors-1 men pga enklere kode gidd ikke

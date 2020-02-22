@@ -12,8 +12,8 @@ int moving_up();
 
 int moving_down();
 
-void stop_up();
+int stop_up();
 
-void stop_down();
+int stop_down();
 
 void elevator();

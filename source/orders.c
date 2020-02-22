@@ -43,7 +43,7 @@ void clear_order(int floor, HardwareOrder order_type){
 }
 
 void clear_all_orders(){
-        HardwareOrder order_types[3] = {
+    HardwareOrder order_types[3] = {
         HARDWARE_ORDER_UP,
         HARDWARE_ORDER_INSIDE,
         HARDWARE_ORDER_DOWN

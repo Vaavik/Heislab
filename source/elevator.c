@@ -23,7 +23,7 @@ int idle(){
                 goto end;
             }
         }
-        for(int f = current_floor + 1; f < HARDWARE_NUMBER_OF_FLOORS; f++){
+        for(int f = HARDWARE_NUMBER_OF_FLOORS -1; f > current_floor; f--){
             if(order_inside[f] || order_down[f] || order_up[f]){
                 current_destination = f;
                 state = moving_up_state;
@@ -38,17 +38,14 @@ int idle(){
 int moving_up(){ //har ikke implementert current_destination
     int state;
     hardware_command_movement(HARDWARE_MOVEMENT_UP);
-
-
     while(1){
         update_orders();
         for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             if(hardware_read_floor_sensor(f)){
                 current_floor = f;
                 hardware_command_floor_indicator_on(f);
-                if(order_up[f]||order_inside[f]||current_destination == f){ //current destination does not work yet
-                    //state = stop_up_state;
-                    state = idle_state;
+                if(order_up[f]||order_inside[f]||current_destination == f){ 
+                    state = stop_up_state;
                     goto end;
                 }
 
@@ -70,8 +67,7 @@ int moving_down(){
                 current_floor = f;
                 hardware_command_floor_indicator_on(f);
                 if(order_down[f]||order_inside[f]||current_destination == f){
-                    //state = stop_up_state;
-                    state = idle_state;
+                    state = stop_up_state;
                     goto end;
                 }
 
@@ -83,12 +79,50 @@ int moving_down(){
 
 }
 
-void stop_up(){
+int stop_up(){
+    int state;
+    hardware_command_movement(HARDWARE_MOVEMENT_STOP);
+    HardwareOrder order_types[3] = {
+        HARDWARE_ORDER_UP,
+        HARDWARE_ORDER_INSIDE,
+        HARDWARE_ORDER_DOWN
+    };
+    for(int i = 0; i < 3; i++){
+        HardwareOrder order_type = order_types[i];
+        clear_order(current_floor, order_type);
+    }
+    //fiks åpne dør her
+    if(current_destination > current_floor){
+        state = moving_up_state;
+    }
+    else{
+        state = idle_state;
+    }
 
+    return state;
 }
 
-void stop_down(){
+int stop_down(){
+    int state;
+    hardware_command_movement(HARDWARE_MOVEMENT_STOP);
+    HardwareOrder order_types[3] = {
+        HARDWARE_ORDER_UP,
+        HARDWARE_ORDER_INSIDE,
+        HARDWARE_ORDER_DOWN
+    };
+    for(int i = 0; i < 3; i++){
+        HardwareOrder order_type = order_types[i];
+        clear_order(current_floor, order_type);
+    }
+    //fiks åpne dør her
+    if(current_destination < current_floor){
+        state = moving_down_state;
+    }
+    else{
+        state = idle_state;
+    }
 
+    return state;
 }
 
 
@@ -110,11 +144,11 @@ void elevator(){
                 break;
             }
             case stop_up_state: {
-                stop_up();
+                state = stop_up();
                 break;
             }
             case stop_down_state: {
-                stop_down();
+                state = stop_down();
                 break;
             }
         }
