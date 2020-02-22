@@ -43,7 +43,7 @@ int main(){
         }
 
 
-        update_orders();
+        update_orders(1);
         for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             if(hardware_read_floor_sensor(f)){
                 clear_order(f, HARDWARE_ORDER_INSIDE);

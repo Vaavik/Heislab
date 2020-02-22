@@ -11,10 +11,15 @@ int idle(){
     int state;
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     while(1){
-        update_orders();
+        update_orders(1);
         if(order_inside[current_floor]||order_up[current_floor]){
             current_destination = current_floor;
             state = stop_up_state;
+            goto end;
+        }
+        if(order_down[current_floor]){
+            current_destination = current_floor;
+            state = stop_down_state;
             goto end;
         }
         for(int f = 0; f < current_floor; f++){
@@ -40,7 +45,7 @@ int moving_up(){ //har ikke implementert current_destination
     int state;
     hardware_command_movement(HARDWARE_MOVEMENT_UP);
     while(1){
-        update_orders();
+        update_orders(1);
         for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             if(hardware_read_floor_sensor(f)){
                 current_floor = f;
@@ -62,13 +67,13 @@ int moving_down(){
     int state;
     hardware_command_movement(HARDWARE_MOVEMENT_DOWN);
     while(1){
-        update_orders();
+        update_orders(0);
         for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             if(hardware_read_floor_sensor(f)){
                 current_floor = f;
                 hardware_command_floor_indicator_on(f);
                 if(order_down[f]||order_inside[f]||current_destination == f){
-                    state = stop_up_state;
+                    state = stop_down_state;
                     goto end;
                 }
 
@@ -97,7 +102,10 @@ int stop_up(){
     int sec = 0, trigger = 3;       //timer 3 sek
     clock_t before = clock();
     while(sec < trigger){
-        update_orders();            //tar imot ordre samtidig
+        update_orders(1);            //tar imot ordre samtidig
+        if(hardware_read_obstruction_signal()){  //Resetter timeren når obstruction er på
+            before = clock();
+        }
 
         clock_t diff = clock() - before;
         sec = diff/ CLOCKS_PER_SEC;
@@ -114,6 +122,7 @@ int stop_up(){
 
     return state;
 }
+
 
 int stop_down(){
     int state;
@@ -132,7 +141,10 @@ int stop_down(){
     int sec = 0, trigger = 3;       //timer 3 sek
     clock_t before = clock();
     while(sec < trigger){
-        update_orders();            //tar imot ordre samtidig
+        update_orders(0);            //tar imot ordre samtidig
+        if(hardware_read_obstruction_signal()){  //Resetter timeren når obstruction er på
+            before = clock();
+        }
 
         clock_t diff = clock() - before;
         sec = diff/ CLOCKS_PER_SEC;
@@ -176,10 +188,6 @@ void elevator(){
                 state = stop_down();
                 break;
             }
-        }
-        if(hardware_read_stop_signal()){
-            hardware_command_movement(HARDWARE_MOVEMENT_STOP);
-            break;
         }
 
     }
