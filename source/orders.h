@@ -6,6 +6,7 @@
 #include <stdbool.h>
 
 int current_floor;
+bool current_direction; //1 for up 0 for down
 int current_destination; 
 
 bool order_inside[HARDWARE_NUMBER_OF_FLOORS];

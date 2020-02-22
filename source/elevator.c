@@ -12,16 +12,36 @@ int idle(){
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     while(1){
         update_orders(1);
-        if(order_inside[current_floor]||order_up[current_floor]){
-            current_destination = current_floor;
-            state = stop_up_state;
+
+        if(hardware_read_stop_signal()){
+            state = stop_state;
+            goto end;
+        }
+
+        if(order_inside[current_floor]||order_up[current_floor]){  //denna seksjonen e stygg, pls fiks
+            if(hardware_read_floor_sensor(current_floor)){
+                current_destination = current_floor;
+                state = stop_up_state;
+            }
+            else{
+                if(current_direction){state = moving_down_state;}
+                else {state = moving_up_state;}
+            }
             goto end;
         }
         if(order_down[current_floor]){
-            current_destination = current_floor;
-            state = stop_down_state;
+            if(hardware_read_floor_sensor(current_floor)){
+                current_destination = current_floor;
+                state = stop_down_state;
+            }
+            else{
+                if(current_direction){state = moving_down_state;}
+                else {state = moving_up_state;}
+            }
             goto end;
-        }
+        }                                                       //stygg til hit
+
+
         for(int f = 0; f < current_floor; f++){
             if(order_inside[f] || order_down[f] || order_up[f]){
                 current_destination = f;
@@ -41,11 +61,16 @@ int idle(){
     return state;
 }
 
-int moving_up(){ //har ikke implementert current_destination
+int moving_up(){ 
     int state;
     hardware_command_movement(HARDWARE_MOVEMENT_UP);
+    current_direction = 1;
     while(1){
         update_orders(1);
+        if(hardware_read_stop_signal()){
+            state = stop_state;
+            break;
+        }
         for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             if(hardware_read_floor_sensor(f)){
                 current_floor = f;
@@ -66,8 +91,13 @@ int moving_up(){ //har ikke implementert current_destination
 int moving_down(){
     int state;
     hardware_command_movement(HARDWARE_MOVEMENT_DOWN);
+    current_direction = 0; 
     while(1){
         update_orders(0);
+        if(hardware_read_stop_signal()){
+            state = stop_state;
+            break;
+        }
         for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             if(hardware_read_floor_sensor(f)){
                 current_floor = f;
@@ -102,6 +132,13 @@ int stop_up(){
     int sec = 0, trigger = 3;       //timer 3 sek
     clock_t before = clock();
     while(sec < trigger){
+
+        if(hardware_read_stop_signal()){
+            state = stop_state;
+            goto end;
+        }
+
+
         update_orders(1);            //tar imot ordre samtidig
         if(hardware_read_obstruction_signal()){  //Resetter timeren når obstruction er på
             before = clock();
@@ -120,6 +157,8 @@ int stop_up(){
         state = idle_state;
     }
 
+    end: ;
+
     return state;
 }
 
@@ -127,7 +166,7 @@ int stop_up(){
 int stop_down(){
     int state;
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);  
-    HardwareOrder order_types[3] = {    //clearer alle ordrene til etasjen
+    HardwareOrder order_types[3] = {    //clearer alle ordrene til etasjen //lag en fuckings global variabel idiot
         HARDWARE_ORDER_UP,
         HARDWARE_ORDER_INSIDE,
         HARDWARE_ORDER_DOWN
@@ -162,6 +201,39 @@ int stop_down(){
     return state;
 }
 
+int stop(){
+    hardware_command_movement(HARDWARE_MOVEMENT_STOP);
+    hardware_command_stop_light(1);
+    clear_all_orders();
+    if(hardware_read_floor_sensor(current_floor)){
+        hardware_command_door_open(1);
+    }
+
+    while(hardware_read_stop_signal()){
+
+    }
+    hardware_command_stop_light(0);
+
+    //lukker dør:  //lag en funksjon av dette close_door(int sec) elns
+    int sec = 0, trigger = 3;       //timer 3 sek
+    clock_t before = clock();
+    while(sec < trigger){
+        update_orders(0);            //tar imot ordre samtidig
+        if(hardware_read_obstruction_signal()){  //Resetter timeren når obstruction er på
+            before = clock();
+        }
+
+        clock_t diff = clock() - before;
+        sec = diff/ CLOCKS_PER_SEC;
+    }
+    hardware_command_door_open(0);  //lukker døra her
+
+
+
+
+    return idle_state;
+}
+
 
 
 void elevator(){ 
@@ -186,6 +258,10 @@ void elevator(){
             }
             case stop_down_state: {
                 state = stop_down();
+                break;
+            }
+            case stop_state: {
+                state = stop();
                 break;
             }
         }
