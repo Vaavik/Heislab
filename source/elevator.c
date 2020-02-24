@@ -7,6 +7,40 @@
 #include "elevator.h"
 
 
+
+void elevator(){ 
+    int state = idle_state;
+    while(1){
+        switch (state) {
+            case idle_state: {
+                state = idle();
+                break;
+            }
+            case moving_up_state: {
+                state = moving_up();
+                break;
+            }
+            case moving_down_state: {
+                state = moving_down();
+                break;
+            }
+            case stop_up_state: {
+                state = stop_up();
+                break;
+            }
+            case stop_down_state: {
+                state = stop_down();
+                break;
+            }
+            case stop_state: {
+                state = stop();
+                break;
+            }
+        }
+
+    }
+}
+
 int idle(){
     int state;
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
@@ -20,7 +54,7 @@ int idle(){
 
         if(order_inside[current_floor]||order_up[current_floor]){  //denna seksjonen e stygg, pls fiks
             if(hardware_read_floor_sensor(current_floor)){
-                current_destination = current_floor;
+                current_endstation = current_floor;
                 state = stop_up_state;
             }
             else{
@@ -31,7 +65,7 @@ int idle(){
         }
         if(order_down[current_floor]){
             if(hardware_read_floor_sensor(current_floor)){
-                current_destination = current_floor;
+                current_endstation = current_floor;
                 state = stop_down_state;
             }
             else{
@@ -44,14 +78,14 @@ int idle(){
 
         for(int f = 0; f < current_floor; f++){
             if(order_inside[f] || order_down[f] || order_up[f]){
-                current_destination = f;
+                current_endstation = f;
                 state = moving_down_state;
                 goto end;
             }
         }
         for(int f = HARDWARE_NUMBER_OF_FLOORS -1; f > current_floor; f--){
             if(order_inside[f] || order_down[f] || order_up[f]){
-                current_destination = f;
+                current_endstation = f;
                 state = moving_up_state;
                 goto end;
             }
@@ -75,7 +109,7 @@ int moving_up(){
             if(hardware_read_floor_sensor(f)){
                 current_floor = f;
                 hardware_command_floor_indicator_on(f);
-                if(order_up[f]||order_inside[f]||current_destination == f){ 
+                if(order_up[f]||order_inside[f]||current_endstation == f){ 
                     state = stop_up_state;
                     goto end;
                 }
@@ -102,7 +136,7 @@ int moving_down(){
             if(hardware_read_floor_sensor(f)){
                 current_floor = f;
                 hardware_command_floor_indicator_on(f);
-                if(order_down[f]||order_inside[f]||current_destination == f){
+                if(order_down[f]||order_inside[f]||current_endstation == f){
                     state = stop_down_state;
                     goto end;
                 }
@@ -150,7 +184,7 @@ int stop_up(){
     hardware_command_door_open(0);  //lukker døra her
 
 
-    if(current_destination > current_floor){
+    if(current_endstation > current_floor){
         state = moving_up_state;
     }
     else{
@@ -191,7 +225,7 @@ int stop_down(){
     hardware_command_door_open(0);  //lukker døra her
 
 
-    if(current_destination < current_floor){
+    if(current_endstation < current_floor){
         state = moving_down_state;
     }
     else{
@@ -214,7 +248,7 @@ int stop(){
     }
     hardware_command_stop_light(0);
 
-    //lukker dør:  //lag en funksjon av dette close_door(int sec) elns
+    //lukker dør:  //lag en funksjon av dette close_door(int sec) elns, heller sett state til stop up/down state nå hvis den er på en etasje
     int sec = 0, trigger = 3;       //timer 3 sek
     clock_t before = clock();
     while(sec < trigger){
@@ -235,36 +269,3 @@ int stop(){
 }
 
 
-
-void elevator(){ 
-    int state = idle_state;
-    while(1){
-        switch (state) {
-            case idle_state: {
-                state = idle();
-                break;
-            }
-            case moving_up_state: {
-                state = moving_up();
-                break;
-            }
-            case moving_down_state: {
-                state = moving_down();
-                break;
-            }
-            case stop_up_state: {
-                state = stop_up();
-                break;
-            }
-            case stop_down_state: {
-                state = stop_down();
-                break;
-            }
-            case stop_state: {
-                state = stop();
-                break;
-            }
-        }
-
-    }
-}
