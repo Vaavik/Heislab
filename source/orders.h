@@ -5,14 +5,15 @@
 
 #include <stdbool.h>
 
-int current_floor;
 bool current_direction; //1 for up 0 for down
-int current_endstation;
 
 typedef struct{
-    int floor;
-    bool above;
+    int current;
+    int last;
 }Floor;
+
+bool floor_update(Floor * floor);
+
 
 typedef struct{
     bool inside[HARDWARE_NUMBER_OF_FLOORS];

@@ -3,6 +3,7 @@
 #include <signal.h>
 #include "hardware.h"
 #include "orders.h"
+#include "floor.h"
 #include "init.h"
 #include "elevator.h"
 

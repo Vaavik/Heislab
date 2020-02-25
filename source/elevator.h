@@ -25,7 +25,7 @@ void elevator();
  * @return The new state.
  */
 
-int idle(Orders * p_orders);
+int idle(Orders * p_orders, Floor * p_floor);
 
 /**
  * @brief The moving up state. Sets the motor to @c HARDWARE_MOVEMENT_UP. 
@@ -36,7 +36,7 @@ int idle(Orders * p_orders);
  *  @return The new state. 
  */
 
-int moving(Orders * p_orders, bool direction);
+int moving(Orders * p_orders, Floor * p_floor, bool direction);
 
 
 /**
@@ -48,11 +48,11 @@ int moving(Orders * p_orders, bool direction);
  * @return The new state.
  */
 
-int stop(Orders * p_orders, bool direction);
+int stop(Orders * p_orders, Floor * p_floor, bool direction);
 /**
  * @brief The stop state. Sets the motor to @c HARDWARE_MOVEMENT_STOP, clears all orders and turns on the stop light for as long  
  * 
  *
  */
 
-int emergency_stop(Orders * p_orders);
+int emergency_stop(Orders * p_orders, Floor * p_floor);

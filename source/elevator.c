@@ -4,6 +4,7 @@
 #include <time.h>
 #include "hardware.h"
 #include "orders.h"
+//#include "floor.h"
 #include "elevator.h"
 
 #define up_direction 1
@@ -16,31 +17,31 @@ void elevator(){
     Orders * p_orders = &orders;
 
     Floor floor = {0, 0};
-    Floor * p_floor;
+    Floor * p_floor = &floor;
     while(1){
         switch (state) {
             case idle_state: {
-                state = idle(p_orders);
+                state = idle(p_orders, p_floor);
                 break;
             }
             case moving_up_state: {
-                state = moving(p_orders, up_direction);
+                state = moving(p_orders, p_floor, up_direction);
                 break;
             }
             case moving_down_state: {
-                state = moving(p_orders, down_direction);
+                state = moving(p_orders, p_floor, down_direction);
                 break;
             }
             case stop_up_state: {
-                state = stop(p_orders, up_direction);
+                state = stop(p_orders, p_floor, up_direction);
                 break;
             }
             case stop_down_state: {
-                state = stop(p_orders, down_direction);
+                state = stop(p_orders, p_floor, down_direction);
                 break;
             }
             case stop_state: {
-                state = emergency_stop(p_orders);
+                state = emergency_stop(p_orders, p_floor);
                 break;
             }
         }
@@ -48,24 +49,24 @@ void elevator(){
     }
 }
 
-int idle(Orders * p_orders){
+int idle(Orders * p_orders, Floor * p_floor){
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     while(1){
         update_orders(p_orders,1);
 
         if(hardware_read_stop_signal()){return stop_state;}
 
-        if(p_orders->inside[current_floor]||p_orders->up[current_floor]){  //denna seksjonen e stygg, pls fiks, den e her for å fikse det som skjer hvis man trykke på samme etasje
-            if(hardware_read_floor_sensor(current_floor)){
-                current_endstation = current_floor; //denne er unødvendig tror jeg, siden den allerede er på current_endstation. test å ta det bort senere. fuck emergency stop
+        if(p_orders->inside[p_floor->current]||p_orders->up[p_floor->current]){  //denna seksjonen e stygg, pls fiks, den e her for å fikse det som skjer hvis man trykke på samme etasje
+            if(hardware_read_floor_sensor(p_floor->current)){
+                p_orders->endstation = p_floor->current; //denne er unødvendig tror jeg, siden den allerede er på current_endstation. test å ta det bort senere. fuck emergency stop
                 return stop_up_state;
             }
             else if(current_direction){return moving_down_state;} 
                 else {return moving_up_state;}
         }
-        if(p_orders->down[current_floor]){
-            if(hardware_read_floor_sensor(current_floor)){ //trenger ikke denne ifen av samme grunn som else foran. ops den trengs pga emergency stop
-                current_endstation = current_floor;  // trenger ikke, tror den trengs pga emergency stop
+        if(p_orders->down[p_floor->current]){
+            if(hardware_read_floor_sensor(p_floor->current)){ //trenger ikke denne ifen av samme grunn som else foran. ops den trengs pga emergency stop
+                p_orders->endstation = p_floor->current;  // trenger ikke, tror den trengs pga emergency stop
                 return stop_down_state;
             }
             else{ //denne else trenger ikke å være her, fordi den ikke kan bevege seg da vi fjerner etterpå. eller jo! den trengs pra emergency stop
@@ -75,15 +76,15 @@ int idle(Orders * p_orders){
         }                                                       //stygg til hit
 
 
-        for(int f = 0; f < current_floor; f++){
+        for(int f = 0; f < p_floor->current; f++){
             if(p_orders->inside[f] || p_orders->down[f] || p_orders->up[f]){
-                current_endstation = f;
+                p_orders->endstation = f;
                 return moving_down_state;
             }
         }
-        for(int f = HARDWARE_NUMBER_OF_FLOORS -1; f > current_floor; f--){
+        for(int f = HARDWARE_NUMBER_OF_FLOORS -1; f > p_floor->current; f--){
             if(p_orders->inside[f] || p_orders->down[f] || p_orders->up[f]){
-                current_endstation = f;
+                p_orders->endstation = f;
                 return moving_up_state;
             }
         }
@@ -92,7 +93,7 @@ int idle(Orders * p_orders){
 }
 
 
-int moving(Orders * p_orders, bool direction){
+int moving(Orders * p_orders, Floor * p_floor, bool direction){
 
     if(direction){hardware_command_movement(HARDWARE_MOVEMENT_UP);}
     else{hardware_command_movement(HARDWARE_MOVEMENT_DOWN);}
@@ -101,22 +102,17 @@ int moving(Orders * p_orders, bool direction){
         update_orders(p_orders, direction);
         if(hardware_read_stop_signal()){return stop_state;}
 
-        for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
-            if(hardware_read_floor_sensor(f)){
-                current_floor = f;
-                hardware_command_floor_indicator_on(f);
-                if(direction && (p_orders->up[f]||p_orders->inside[f]||current_endstation == f)){return stop_up_state;}
-                if(!direction && (p_orders->down[f]||p_orders->inside[f]||current_endstation == f)){return stop_down_state;}
-            }
+        if(floor_update(p_floor)){
+            if(direction && (p_orders->up[p_floor->current]||p_orders->inside[p_floor->current]||p_orders->endstation == p_floor->current)){return stop_up_state;}
+            if(!direction && (p_orders->down[p_floor->current]||p_orders->inside[p_floor->current]||p_orders->endstation == p_floor->current)){return stop_down_state;}
+
         }
     }
-    
-
 }
 
 
 
-int stop(Orders * p_orders, bool direction){
+int stop(Orders * p_orders, Floor * p_floor, bool direction){
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     HardwareOrder order_types[3] = {
         HARDWARE_ORDER_UP,
@@ -125,7 +121,7 @@ int stop(Orders * p_orders, bool direction){
     };
     for(int i = 0; i < 3; i++){
         HardwareOrder order_type = order_types[i];
-        clear_order(p_orders, current_floor, order_type);
+        clear_order(p_orders, p_floor->current, order_type);
     }
 
     hardware_command_door_open(1);  //åpner døra her
@@ -146,17 +142,17 @@ int stop(Orders * p_orders, bool direction){
     }
     hardware_command_door_open(0);  //lukker døra her
 
-    if(direction && (current_endstation > current_floor)){return moving_up_state;}          //set above = 1 her, for  sikre emergency
-    else if(direction && (current_endstation < current_floor)){return moving_down_state;}   //above = 0
+    if(direction && (p_orders->endstation > p_floor->current)){return moving_up_state;}          //set above = 1 her, for  sikre emergency
+    else if(direction && (p_orders->endstation < p_floor->current)){return moving_down_state;}   //above = 0
     else{return idle_state;}
 }
 
 
-int emergency_stop(Orders * p_orders){
+int emergency_stop(Orders * p_orders, Floor * p_floor){
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     hardware_command_stop_light(1);
     clear_all_orders(p_orders);
-    if(hardware_read_floor_sensor(current_floor)){
+    if(hardware_read_floor_sensor(p_floor->current)){
         hardware_command_door_open(1);
         while(hardware_read_stop_signal()){}
         hardware_command_stop_light(0);

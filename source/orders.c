@@ -5,6 +5,19 @@
 #include "orders.h"
 
 
+bool floor_update(Floor * floor){
+    for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
+        if(hardware_read_floor_sensor(f)){
+            floor->last = floor->current;
+            floor->current = f;
+            hardware_command_floor_indicator_on(f);
+            return 1;
+        }
+    }
+    return 0;
+}
+
+
 void update_orders(Orders * p_orders,bool direction){
     for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             /* Internal orders */
@@ -28,7 +41,7 @@ void update_orders(Orders * p_orders,bool direction){
     if (direction){
         for(int f = HARDWARE_NUMBER_OF_FLOORS - 1; f >= 0; f--){        //setting the first floor that has an order to current destination (counting from the top).
              if(p_orders->inside[f] || p_orders->down[f] || p_orders->up[f]){
-                current_endstation = f;
+                p_orders->endstation = f;
                 break;
             }
             
@@ -38,7 +51,7 @@ void update_orders(Orders * p_orders,bool direction){
     else{
         for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){             //setting the first floor that has an order to current destination (counting from the bottom).
             if(p_orders->inside[f] || p_orders->down[f] || p_orders->up[f]){
-                current_endstation = f;
+                p_orders->endstation = f;
                 break;
             }
             

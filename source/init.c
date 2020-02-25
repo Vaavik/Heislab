@@ -25,13 +25,12 @@ void init(){
 
     Orders orders = {{0,0,0,0},{0,0,0,0},{0,0,0,0},0};
     Orders * p_orders = &orders;
-    
+
     clear_all_orders(p_orders);
 
     hardware_command_movement(HARDWARE_MOVEMENT_DOWN); //går ned til første etasje og setter etasjen.
     while(!hardware_read_floor_sensor(0)){}
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
-    current_floor = 0; //index starts at 0, dermed sett første etasje som 0
     printf("initializing complete\n");
 
 
