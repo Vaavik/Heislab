@@ -5,7 +5,6 @@
 
 #include <stdbool.h>
 
-
 typedef struct{
     int current;
     bool above;

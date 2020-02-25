@@ -53,9 +53,8 @@ int idle(Orders * p_orders, Floor * p_floor){
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     while(1){
         update_orders(p_orders,1);
-
         if(hardware_read_stop_signal()){return stop_state;}
-
+        
         if(p_orders->inside[p_floor->current]||p_orders->up[p_floor->current]){  //denna seksjonen e stygg, pls fiks, den e her for å fikse det som skjer hvis man trykke på samme etasje
             if(hardware_read_floor_sensor(p_floor->current)){
                 p_orders->endstation = p_floor->current; //denne er unødvendig tror jeg, siden den allerede er på current_endstation. test å ta det bort senere. fuck emergency stop
@@ -75,20 +74,12 @@ int idle(Orders * p_orders, Floor * p_floor){
             }
         }                                                       //stygg til hit
 
+        if(p_orders->endstation > p_floor->current){return moving_up_state;}
+        if(p_orders->endstation < p_floor->current){return moving_down_state;}
 
-        for(int f = 0; f < p_floor->current; f++){
-            if(p_orders->inside[f] || p_orders->down[f] || p_orders->up[f]){
-                p_orders->endstation = f;
-                return moving_down_state;
-            }
-        }
-        for(int f = HARDWARE_NUMBER_OF_FLOORS -1; f > p_floor->current; f--){
-            if(p_orders->inside[f] || p_orders->down[f] || p_orders->up[f]){
-                p_orders->endstation = f;
-                return moving_up_state;
-            }
-        }
+
     }
+
 
 }
 
