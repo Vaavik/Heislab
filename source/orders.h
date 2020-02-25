@@ -5,7 +5,6 @@
 
 #include <stdbool.h>
 
-bool current_direction; //1 for up 0 for down
 
 typedef struct{
     int current;

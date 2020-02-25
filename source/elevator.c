@@ -97,7 +97,6 @@ int moving(Orders * p_orders, Floor * p_floor, bool direction){
 
     if(direction){hardware_command_movement(HARDWARE_MOVEMENT_UP);}
     else{hardware_command_movement(HARDWARE_MOVEMENT_DOWN);}
-    current_direction = direction;
     while(1){
         update_orders(p_orders, direction);
         if(hardware_read_stop_signal()){return stop_state;}

@@ -61,16 +61,20 @@ void update_orders(Orders * p_orders,bool direction){
 
 void clear_order(Orders * p_orders,int floor, HardwareOrder order_type){
     hardware_command_order_light(floor, order_type, 0);
-    if(order_type == HARDWARE_ORDER_INSIDE){        //gjør dette til en switch case
-                p_orders->inside[floor] = 0;
+    switch(order_type){
+        case HARDWARE_ORDER_INSIDE:{
+            p_orders->inside[floor] = 0;
+            break;
+         }
+        case HARDWARE_ORDER_UP:{
+            p_orders->up[floor] = 0;
+            break;
+         }
+        case HARDWARE_ORDER_DOWN:{
+            p_orders->down[floor] = 0;
+            break;
+         }
     }
-    if(order_type == HARDWARE_ORDER_UP){
-                p_orders->up[floor] = 0;
-    }
-    if(order_type == HARDWARE_ORDER_DOWN){
-                p_orders->down[floor] = 0;
-    }
-
 }
 
 void clear_all_orders(Orders * p_orders){
