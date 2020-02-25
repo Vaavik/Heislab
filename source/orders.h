@@ -9,10 +9,10 @@ bool current_direction; //1 for up 0 for down
 
 typedef struct{
     int current;
-    int last;
+    bool above;
 }Floor;
 
-bool floor_update(Floor * floor);
+bool floor_update(Floor * floor, bool direction);
 
 
 typedef struct{

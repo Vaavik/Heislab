@@ -61,7 +61,7 @@ int idle(Orders * p_orders, Floor * p_floor){
                 p_orders->endstation = p_floor->current; //denne er unødvendig tror jeg, siden den allerede er på current_endstation. test å ta det bort senere. fuck emergency stop
                 return stop_up_state;
             }
-            else if(current_direction){return moving_down_state;} 
+            else if(p_floor->above){return moving_down_state;} 
                 else {return moving_up_state;}
         }
         if(p_orders->down[p_floor->current]){
@@ -70,7 +70,7 @@ int idle(Orders * p_orders, Floor * p_floor){
                 return stop_down_state;
             }
             else{ //denne else trenger ikke å være her, fordi den ikke kan bevege seg da vi fjerner etterpå. eller jo! den trengs pra emergency stop
-                if(current_direction){return moving_down_state;}
+                if(p_floor->above){return moving_down_state;}
                 else {return moving_up_state;}
             }
         }                                                       //stygg til hit
@@ -102,7 +102,7 @@ int moving(Orders * p_orders, Floor * p_floor, bool direction){
         update_orders(p_orders, direction);
         if(hardware_read_stop_signal()){return stop_state;}
 
-        if(floor_update(p_floor)){
+        if(floor_update(p_floor, direction)){
             if(direction && (p_orders->up[p_floor->current]||p_orders->inside[p_floor->current]||p_orders->endstation == p_floor->current)){return stop_up_state;}
             if(!direction && (p_orders->down[p_floor->current]||p_orders->inside[p_floor->current]||p_orders->endstation == p_floor->current)){return stop_down_state;}
 
@@ -132,7 +132,7 @@ int stop(Orders * p_orders, Floor * p_floor, bool direction){
         if(hardware_read_stop_signal()){return stop_state;}
 
 
-        update_orders(p_orders, 1);            //tar imot ordre samtidig
+        update_orders(p_orders, direction);            //tar imot ordre samtidig
         if(hardware_read_obstruction_signal()){  //Resetter timeren når obstruction er på
             before = clock();
         }
