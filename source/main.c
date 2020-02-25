@@ -2,7 +2,6 @@
 #define LIB_H
 #include <stdio.h>
 #include <stdlib.h>
-#include <signal.h>
 #include "hardware.h"
 #include "orders.h"
 #include "floor.h"
