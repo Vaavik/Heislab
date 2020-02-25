@@ -42,115 +42,84 @@ void elevator(){
 }
 
 int idle(){
-    int state;
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     while(1){
         update_orders(1);
 
-        if(hardware_read_stop_signal()){
-            state = stop_state;
-            goto end;
-        }
+        if(hardware_read_stop_signal()){return stop_state;}
 
-        if(order_inside[current_floor]||order_up[current_floor]){  //denna seksjonen e stygg, pls fiks
+        if(order_inside[current_floor]||order_up[current_floor]){  //denna seksjonen e stygg, pls fiks, den e her for å fikse det som skjer hvis man trykke på samme etasje
             if(hardware_read_floor_sensor(current_floor)){
-                current_endstation = current_floor;
-                state = stop_up_state;
+                current_endstation = current_floor; //denne er unødvendig tror jeg, siden den allerede er på current_endstation. test å ta det bort senere. fuck emergency stop
+                return stop_up_state;
             }
-            else{
-                if(current_direction){state = moving_down_state;}
-                else {state = moving_up_state;}
-            }
-            goto end;
+            else if(current_direction){return moving_down_state;}  //bare sett en av de som deafult
+                else {return moving_up_state;}
         }
         if(order_down[current_floor]){
-            if(hardware_read_floor_sensor(current_floor)){
-                current_endstation = current_floor;
-                state = stop_down_state;
+            if(hardware_read_floor_sensor(current_floor)){ //trenger ikke denne ifen av samme grunn som else foran. ops den trengs pga emergency stop
+                current_endstation = current_floor;  // trenger ikke, tror den trengs pga emergency stop
+                return stop_down_state;
             }
-            else{
-                if(current_direction){state = moving_down_state;}
-                else {state = moving_up_state;}
+            else{ //denne else trenger ikke å være her, fordi den ikke kan bevege seg da vi fjerner etterpå. eller jo! den trengs pra emergency stop
+                if(current_direction){return moving_down_state;}
+                else {return moving_up_state;}
             }
-            goto end;
         }                                                       //stygg til hit
 
 
         for(int f = 0; f < current_floor; f++){
             if(order_inside[f] || order_down[f] || order_up[f]){
                 current_endstation = f;
-                state = moving_down_state;
-                goto end;
+                return moving_down_state;
             }
         }
         for(int f = HARDWARE_NUMBER_OF_FLOORS -1; f > current_floor; f--){
             if(order_inside[f] || order_down[f] || order_up[f]){
                 current_endstation = f;
-                state = moving_up_state;
-                goto end;
+                return moving_up_state;
             }
         }
     }
-    end: ;
-    return state;
+
 }
 
-int moving_up(){ 
-    int state;
+int moving_up(){
     hardware_command_movement(HARDWARE_MOVEMENT_UP);
     current_direction = 1;
     while(1){
         update_orders(1);
-        if(hardware_read_stop_signal()){
-            state = stop_state;
-            break;
-        }
+        if(hardware_read_stop_signal()){return stop_state;}
+
         for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             if(hardware_read_floor_sensor(f)){
                 current_floor = f;
                 hardware_command_floor_indicator_on(f);
-                if(order_up[f]||order_inside[f]||current_endstation == f){ 
-                    state = stop_up_state;
-                    goto end;
-                }
-
+                if(order_up[f]||order_inside[f]||current_endstation == f){return stop_up_state;}
             }
         }
     }
-    end: ;
-    return state;
-
 }
 
 int moving_down(){
-    int state;
     hardware_command_movement(HARDWARE_MOVEMENT_DOWN);
     current_direction = 0; 
     while(1){
         update_orders(0);
-        if(hardware_read_stop_signal()){
-            state = stop_state;
-            break;
-        }
+        if(hardware_read_stop_signal()){return stop_state;}
+
         for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             if(hardware_read_floor_sensor(f)){
                 current_floor = f;
                 hardware_command_floor_indicator_on(f);
-                if(order_down[f]||order_inside[f]||current_endstation == f){
-                    state = stop_down_state;
-                    goto end;
-                }
+                if(order_down[f]||order_inside[f]||current_endstation == f){return stop_down_state;}
 
             }
         }
     }
-    end: ;
-    return state;
-
 }
 
 int stop_up(){
-    int state;
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     HardwareOrder order_types[3] = {
         HARDWARE_ORDER_UP,
@@ -167,10 +136,7 @@ int stop_up(){
     clock_t before = clock();
     while(sec < trigger){
 
-        if(hardware_read_stop_signal()){
-            state = stop_state;
-            goto end;
-        }
+        if(hardware_read_stop_signal()){return stop_state;}
 
 
         update_orders(1);            //tar imot ordre samtidig
@@ -183,22 +149,12 @@ int stop_up(){
     }
     hardware_command_door_open(0);  //lukker døra her
 
-
-    if(current_endstation > current_floor){
-        state = moving_up_state;
-    }
-    else{
-        state = idle_state;
-    }
-
-    end: ;
-
-    return state;
+    if(current_endstation > current_floor){return moving_up_state;}
+    else{return idle_state;}
 }
 
 
 int stop_down(){
-    int state;
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);  
     HardwareOrder order_types[3] = {    //clearer alle ordrene til etasjen //lag en fuckings global variabel idiot
         HARDWARE_ORDER_UP,
@@ -225,14 +181,9 @@ int stop_down(){
     hardware_command_door_open(0);  //lukker døra her
 
 
-    if(current_endstation < current_floor){
-        state = moving_down_state;
-    }
-    else{
-        state = idle_state;
-    }
+    if(current_endstation < current_floor){return moving_down_state;}       //dont fucking touch
+    else{return idle_state;}
 
-    return state;
 }
 
 int stop(){
