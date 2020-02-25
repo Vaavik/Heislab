@@ -24,6 +24,14 @@ static void clear_all_order_lights(){
     }
 }
 
+static void sigint_handler(int sig){
+    (void)(sig);
+    printf("Terminating elevator\n");
+    hardware_command_movement(HARDWARE_MOVEMENT_STOP);
+    exit(0);
+}
+
+
 
 void init(){
     int error = hardware_init();
@@ -31,6 +39,8 @@ void init(){
         fprintf(stderr, "Unable to initialize hardware\n");
         exit(1);
     }
+
+    signal(SIGINT, sigint_handler);
 
 
     clear_all_order_lights();
