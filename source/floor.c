@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include "hardware.h"
 #include "floor.h"
-/*
+
 bool floor_update(Floor * floor){
     for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
         if(hardware_read_floor_sensor(f)){
@@ -17,3 +17,4 @@ bool floor_update(Floor * floor){
     }
     return 0;
 }
+*/

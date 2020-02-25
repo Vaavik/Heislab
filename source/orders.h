@@ -33,7 +33,7 @@ bool order_down[HARDWARE_NUMBER_OF_FLOORS];
  * 
  * @p direction The direction the elevator is traveling (1 for up, 0 for down).
  */
-void update_orders(Orders * p_orders, bool direction);
+void update_orders(Orders * p_orders, Floor * p_floor, bool direction);
 
 /**
  * @brief Clears order from floor @p floor of type @p order_type. Turns off respective button lights as well.

@@ -52,7 +52,13 @@ void elevator(){
 int idle(Orders * p_orders, Floor * p_floor){
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     while(1){
-        update_orders(p_orders,1);
+        update_orders(p_orders, p_floor, 1); //denna har bugs forrige kode funke
+        if(p_orders->endstation > p_floor->current){return moving_up_state;}
+        update_orders(p_orders, p_floor, 0);
+        if(p_orders->endstation < p_floor->current){return moving_down_state;}
+
+
+
         if(hardware_read_stop_signal()){return stop_state;}
         
         if(p_orders->inside[p_floor->current]||p_orders->up[p_floor->current]){  //denna seksjonen e stygg, pls fiks, den e her for å fikse det som skjer hvis man trykke på samme etasje
@@ -74,8 +80,7 @@ int idle(Orders * p_orders, Floor * p_floor){
             }
         }                                                       //stygg til hit
 
-        if(p_orders->endstation > p_floor->current){return moving_up_state;}
-        if(p_orders->endstation < p_floor->current){return moving_down_state;}
+
 
 
     }
@@ -89,7 +94,7 @@ int moving(Orders * p_orders, Floor * p_floor, bool direction){
     if(direction){hardware_command_movement(HARDWARE_MOVEMENT_UP);}
     else{hardware_command_movement(HARDWARE_MOVEMENT_DOWN);}
     while(1){
-        update_orders(p_orders, direction);
+        update_orders(p_orders, p_floor, direction);
         if(hardware_read_stop_signal()){return stop_state;}
 
         if(floor_update(p_floor, direction)){
@@ -122,7 +127,7 @@ int stop(Orders * p_orders, Floor * p_floor, bool direction){
         if(hardware_read_stop_signal()){return stop_state;}
 
 
-        update_orders(p_orders, direction);            //tar imot ordre samtidig
+        update_orders(p_orders, p_floor, direction);            //tar imot ordre samtidig
         if(hardware_read_obstruction_signal()){  //Resetter timeren når obstruction er på
             before = clock();
         }

@@ -1,15 +1,16 @@
-/*
+
 /**
  * @file
  * @brief The state machine, and functions for each state.
  */
+
 
 /*
 typedef struct{
     int current;
     int last;
 }Floor;
-
+*/
 
 /**
  * @brief Updates the current floor and last floor. sets floorlights. If it is on a floor.
@@ -18,3 +19,4 @@ typedef struct{
  */
 /*
 bool floor_update(Floor * floor);
+*/

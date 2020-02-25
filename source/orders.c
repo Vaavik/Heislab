@@ -2,7 +2,9 @@
 #include <stdlib.h>
 #include <signal.h>
 #include "hardware.h"
+#include "floor.h"
 #include "orders.h"
+
 
 
 bool floor_update(Floor * p_floor, bool direction){
@@ -18,7 +20,7 @@ bool floor_update(Floor * p_floor, bool direction){
 }
 
 
-void update_orders(Orders * p_orders,bool direction){
+void update_orders(Orders * p_orders, Floor * p_floor, bool direction){
     for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             /* Internal orders */
             if(hardware_read_order(f, HARDWARE_ORDER_INSIDE)){
@@ -39,7 +41,7 @@ void update_orders(Orders * p_orders,bool direction){
             }
         }
     if (direction){
-        for(int f = HARDWARE_NUMBER_OF_FLOORS - 1; f >= 0; f--){        //setting the first floor that has an order to current destination (counting from the top).
+        for(int f = HARDWARE_NUMBER_OF_FLOORS - 1; f > p_floor->current; f--){        //setting the first floor that has an order to current destination (counting from the top).
              if(p_orders->inside[f] || p_orders->down[f] || p_orders->up[f]){
                 p_orders->endstation = f;
                 break;
@@ -49,7 +51,7 @@ void update_orders(Orders * p_orders,bool direction){
         
     }
     else{
-        for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){             //setting the first floor that has an order to current destination (counting from the bottom).
+        for(int f = 0; f < p_floor->current; f++){             //setting the first floor that has an order to current destination (counting from the bottom).
             if(p_orders->inside[f] || p_orders->down[f] || p_orders->up[f]){
                 p_orders->endstation = f;
                 break;
@@ -57,6 +59,10 @@ void update_orders(Orders * p_orders,bool direction){
             
         }
     }
+}
+
+void endstation_set(){
+
 }
 
 void clear_order(Orders * p_orders,int floor, HardwareOrder order_type){
