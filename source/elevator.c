@@ -241,31 +241,13 @@ int stop(){
     clear_all_orders();
     if(hardware_read_floor_sensor(current_floor)){
         hardware_command_door_open(1);
+        while(hardware_read_stop_signal()){}
+        hardware_command_stop_light(0);
+        return stop_down_state;
     }
-
-    while(hardware_read_stop_signal()){
-
+    else{
+        while(hardware_read_stop_signal()){}
+        hardware_command_stop_light(0);
+        return idle_state;
     }
-    hardware_command_stop_light(0);
-
-    //lukker dør:  //lag en funksjon av dette close_door(int sec) elns, heller sett state til stop up/down state nå hvis den er på en etasje
-    int sec = 0, trigger = 3;       //timer 3 sek
-    clock_t before = clock();
-    while(sec < trigger){
-        update_orders(0);            //tar imot ordre samtidig
-        if(hardware_read_obstruction_signal()){  //Resetter timeren når obstruction er på
-            before = clock();
-        }
-
-        clock_t diff = clock() - before;
-        sec = diff/ CLOCKS_PER_SEC;
-    }
-    hardware_command_door_open(0);  //lukker døra her
-
-
-
-
-    return idle_state;
 }
-
-
