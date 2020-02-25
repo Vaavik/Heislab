@@ -23,8 +23,10 @@ void init(){
 
     signal(SIGINT, sigint_handler);
 
-
-    clear_all_orders();
+    Orders orders = {{0,0,0,0},{0,0,0,0},{0,0,0,0},0};
+    Orders * p_orders = &orders;
+    
+    clear_all_orders(p_orders);
 
     hardware_command_movement(HARDWARE_MOVEMENT_DOWN); //går ned til første etasje og setter etasjen.
     while(!hardware_read_floor_sensor(0)){}
