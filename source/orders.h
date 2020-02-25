@@ -2,6 +2,7 @@
  * @file
  * @brief Organizes and handles the orders, and endstation.
  */
+#include <stdbool.h>
 
 
 typedef struct{
