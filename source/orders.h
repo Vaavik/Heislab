@@ -2,16 +2,7 @@
  * @file
  * @brief Organizes and handles the orders, and endstation.
  */
-
 #include <stdbool.h>
-
-
-typedef struct{
-    int current;
-    bool above;
-}Floor;
-
-bool floor_update(Floor * floor, bool direction);
 
 
 typedef struct{

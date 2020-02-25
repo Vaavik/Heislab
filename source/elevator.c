@@ -1,15 +1,17 @@
+#ifndef LIB_H
+#define LIB_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <time.h>
 #include "hardware.h"
 #include "orders.h"
-//#include "floor.h"
+#include "floor.h"
 #include "elevator.h"
 
 #define up_direction 1
 #define down_direction 0
-
+#endif
 
 void elevator(){ 
     int state = idle_state;

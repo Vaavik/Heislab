@@ -1,3 +1,5 @@
+#ifndef LIB_H
+#define LIB_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
@@ -6,7 +8,7 @@
 #include "floor.h"
 #include "init.h"
 #include "elevator.h"
-
+#endif
 
 
 

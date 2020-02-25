@@ -1,11 +1,12 @@
+#ifndef LIB_H
+#define LIB_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
 #include "hardware.h"
 #include "orders.h"
 #include "init.h"
-#include "elevator.h"
-
+#endif
 
 static void sigint_handler(int sig){
     (void)(sig);
