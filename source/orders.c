@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <stdbool.h>
 #include "hardware.h"
 #include "orders.h"
 #endif

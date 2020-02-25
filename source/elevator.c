@@ -9,6 +9,13 @@
 #include "floor.h"
 #include "elevator.h"
 
+#define idle_state 0
+#define moving_up_state 1
+#define moving_down_state 2
+#define stop_up_state 3
+#define stop_down_state 4
+#define stop_state 5
+
 #define up_direction 1
 #define down_direction 0
 #endif
