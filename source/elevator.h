@@ -36,9 +36,8 @@ int idle();
  *  @return The new state. 
  */
 
-int moving_up();
+int moving(bool direction);
 
-int moving_down();
 
 /**
  * @brief The stop up state. Sets the motor to @c HARDWARE_MOVEMENT_STOP.

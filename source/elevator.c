@@ -6,6 +6,8 @@
 #include "orders.h"
 #include "elevator.h"
 
+#define up 1
+#define down 0
 
 
 void elevator(){ 
@@ -17,11 +19,11 @@ void elevator(){
                 break;
             }
             case moving_up_state: {
-                state = moving_up();
+                state = moving(up);
                 break;
             }
             case moving_down_state: {
-                state = moving_down();
+                state = moving(down);
                 break;
             }
             case stop_up_state: {
@@ -84,40 +86,29 @@ int idle(){
 
 }
 
-int moving_up(){
-    hardware_command_movement(HARDWARE_MOVEMENT_UP);
-    current_direction = 1;
+
+int moving(bool direction){
+
+    if(direction){hardware_command_movement(HARDWARE_MOVEMENT_UP);}
+    else{hardware_command_movement(HARDWARE_MOVEMENT_DOWN);}
+    current_direction = direction;
     while(1){
-        update_orders(1);
+        update_orders(direction);
         if(hardware_read_stop_signal()){return stop_state;}
 
         for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             if(hardware_read_floor_sensor(f)){
                 current_floor = f;
                 hardware_command_floor_indicator_on(f);
-                if(order_up[f]||order_inside[f]||current_endstation == f){return stop_up_state;}
+                if(direction && (order_up[f]||order_inside[f]||current_endstation == f)){return stop_up_state;}
+                if(!direction && (order_down[f]||order_inside[f]||current_endstation == f)){return stop_down_state;}
             }
         }
     }
+    
+
 }
 
-int moving_down(){
-    hardware_command_movement(HARDWARE_MOVEMENT_DOWN);
-    current_direction = 0; 
-    while(1){
-        update_orders(0);
-        if(hardware_read_stop_signal()){return stop_state;}
-
-        for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
-            if(hardware_read_floor_sensor(f)){
-                current_floor = f;
-                hardware_command_floor_indicator_on(f);
-                if(order_down[f]||order_inside[f]||current_endstation == f){return stop_down_state;}
-
-            }
-        }
-    }
-}
 
 int stop_up(){
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
