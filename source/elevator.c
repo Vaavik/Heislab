@@ -27,15 +27,15 @@ void elevator(){
                 break;
             }
             case stop_up_state: {
-                state = stop_up();
+                state = stop(up);
                 break;
             }
             case stop_down_state: {
-                state = stop_down();
+                state = stop(down);
                 break;
             }
             case stop_state: {
-                state = stop();
+                state = emergency_stop();
                 break;
             }
         }
@@ -110,7 +110,8 @@ int moving(bool direction){
 }
 
 
-int stop_up(){
+
+int stop(bool direction){
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     HardwareOrder order_types[3] = {
         HARDWARE_ORDER_UP,
@@ -140,44 +141,13 @@ int stop_up(){
     }
     hardware_command_door_open(0);  //lukker døra her
 
-    if(current_endstation > current_floor){return moving_up_state;}
+    if(direction && (current_endstation > current_floor)){return moving_up_state;}          //dont touch
+    else if(direction && (current_endstation < current_floor)){return moving_down_state;}
     else{return idle_state;}
 }
 
 
-int stop_down(){
-    hardware_command_movement(HARDWARE_MOVEMENT_STOP);  
-    HardwareOrder order_types[3] = {    //clearer alle ordrene til etasjen //lag en fuckings global variabel idiot
-        HARDWARE_ORDER_UP,
-        HARDWARE_ORDER_INSIDE,
-        HARDWARE_ORDER_DOWN
-    };
-    for(int i = 0; i < 3; i++){
-        HardwareOrder order_type = order_types[i];
-        clear_order(current_floor, order_type);
-    }
-    
-    hardware_command_door_open(1);  //åpner døra her
-    int sec = 0, trigger = 3;       //timer 3 sek
-    clock_t before = clock();
-    while(sec < trigger){
-        update_orders(0);            //tar imot ordre samtidig
-        if(hardware_read_obstruction_signal()){  //Resetter timeren når obstruction er på
-            before = clock();
-        }
-
-        clock_t diff = clock() - before;
-        sec = diff/ CLOCKS_PER_SEC;
-    }
-    hardware_command_door_open(0);  //lukker døra her
-
-
-    if(current_endstation < current_floor){return moving_down_state;}       //dont fucking touch
-    else{return idle_state;}
-
-}
-
-int stop(){
+int emergency_stop(){
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     hardware_command_stop_light(1);
     clear_all_orders();

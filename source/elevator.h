@@ -48,14 +48,11 @@ int moving(bool direction);
  * @return The new state.
  */
 
-int stop_up();
-
-int stop_down();
-
+int stop(bool direction);
 /**
  * @brief The stop state. Sets the motor to @c HARDWARE_MOVEMENT_STOP, clears all orders and turns on the stop light for as long  
  * 
  *
  */
 
-int stop();
+int emergency_stop();
