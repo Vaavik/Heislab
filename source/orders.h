@@ -5,10 +5,14 @@
 #include <stdbool.h>
 
 
+/**
+ * @brief A structure to represent the orders to the elevator.
+ */
+
 typedef struct{
-    bool inside[HARDWARE_NUMBER_OF_FLOORS];
-    bool up[HARDWARE_NUMBER_OF_FLOORS]; //kunne vært størrelse floors-1 men gjort slik pga enklere indeksering
-    bool down[HARDWARE_NUMBER_OF_FLOORS];
+    bool inside[HARDWARE_NUMBER_OF_FLOORS];     /** < The inside panel orders*/
+    bool up[HARDWARE_NUMBER_OF_FLOORS];         /** < The upwards orders from outside */
+    bool down[HARDWARE_NUMBER_OF_FLOORS];       /** < The downwards orders from outside */
     int endstation;
 }Orders;
 
@@ -21,7 +25,7 @@ typedef struct{
  * @param p_orders A pointer to the order struct that is being updated.
  * @param direction The direction the elevator is traveling (1 for up, 0 for down).
  */
-void update_orders(Orders * p_orders, bool direction);
+void orders_update(Orders * p_orders, bool direction);
 
 /**
  * @brief Clears order from floor @p floor of type @p order_type. Turns off respective button lights as well.
@@ -30,11 +34,11 @@ void update_orders(Orders * p_orders, bool direction);
  * @param floor Floor of the button.
  * @param order_type This decides which button on the floor to clear. The types are HARDWARE_ORDER_UP or HARDWARE_ORDER_DOWN or HARDWARE_ORDER_INSIDE
  */
-void clear_order(Orders * p_orders, int floor, HardwareOrder order_type);
+void orders_clear(Orders * p_orders, int floor, HardwareOrder order_type);
 
 /**
  * @brief Clears all orders from the orders struct @p p_orders is pointing to, and turns off all button lights.
  * 
  * @param p_orders A pointer to the orders struct that is being cleared.
  */
-void clear_all_orders(Orders * p_orders);
+void orders_clear_all(Orders * p_orders);

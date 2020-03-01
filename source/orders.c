@@ -6,7 +6,7 @@
 #include "orders.h"
 #endif
 
-void update_orders(Orders * p_orders,bool direction){
+void orders_update(Orders * p_orders,bool direction){
     for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
             /* Internal orders */
             if(hardware_read_order(f, HARDWARE_ORDER_INSIDE)){
@@ -47,7 +47,7 @@ void update_orders(Orders * p_orders,bool direction){
     }
 }
 
-void clear_order(Orders * p_orders,int floor, HardwareOrder order_type){
+void orders_clear(Orders * p_orders,int floor, HardwareOrder order_type){
     hardware_command_order_light(floor, order_type, 0);
     switch(order_type){
         case HARDWARE_ORDER_INSIDE:{
@@ -65,7 +65,7 @@ void clear_order(Orders * p_orders,int floor, HardwareOrder order_type){
     }
 }
 
-void clear_all_orders(Orders * p_orders){
+void orders_clear_all(Orders * p_orders){
     HardwareOrder order_types[3] = {
         HARDWARE_ORDER_UP,
         HARDWARE_ORDER_INSIDE,
@@ -75,7 +75,7 @@ void clear_all_orders(Orders * p_orders){
     for(int f = 0; f < HARDWARE_NUMBER_OF_FLOORS; f++){
         for(int i = 0; i < 3; i++){
             HardwareOrder order_type = order_types[i];
-            clear_order(p_orders ,f, order_type);
+            orders_clear(p_orders ,f, order_type);
         }
     }
 }

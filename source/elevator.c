@@ -60,7 +60,7 @@ void elevator(){
 int idle(Orders * p_orders, Floor * p_floor){
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     while(1){
-        update_orders(p_orders,1);
+        orders_update(p_orders,1);
 
         if(hardware_read_stop_signal()){return stop_state;}
 
@@ -106,7 +106,7 @@ int moving(Orders * p_orders, Floor * p_floor, bool direction){
     if(direction){hardware_command_movement(HARDWARE_MOVEMENT_UP);}
     else{hardware_command_movement(HARDWARE_MOVEMENT_DOWN);}
     while(1){
-        update_orders(p_orders, direction);
+        orders_update(p_orders, direction);
         if(hardware_read_stop_signal()){return stop_state;}
 
         if(floor_update(p_floor, direction)){
@@ -128,7 +128,7 @@ int stop(Orders * p_orders, Floor * p_floor, bool direction){
     };
     for(int i = 0; i < 3; i++){
         HardwareOrder order_type = order_types[i];
-        clear_order(p_orders, p_floor->current, order_type);
+        orders_clear(p_orders, p_floor->current, order_type);
     }
 
     hardware_command_door_open(1);  //åpner døra her
@@ -139,7 +139,7 @@ int stop(Orders * p_orders, Floor * p_floor, bool direction){
         if(hardware_read_stop_signal()){return stop_state;}
 
 
-        update_orders(p_orders, direction);            //tar imot ordre samtidig
+        orders_update(p_orders, direction);            //tar imot ordre samtidig
         if(hardware_read_obstruction_signal()){  //Resetter timeren når obstruction er på
             before = clock();
         }
@@ -158,7 +158,7 @@ int stop(Orders * p_orders, Floor * p_floor, bool direction){
 int emergency_stop(Orders * p_orders, Floor * p_floor){
     hardware_command_movement(HARDWARE_MOVEMENT_STOP);
     hardware_command_stop_light(1);
-    clear_all_orders(p_orders);
+    orders_clear_all(p_orders);
     if(hardware_read_floor_sensor(p_floor->current)){
         hardware_command_door_open(1);
         while(hardware_read_stop_signal()){}
