@@ -64,24 +64,24 @@ int idle(Orders * p_orders, Floor * p_floor){
 
         if(hardware_read_stop_signal()){return stop_state;}
 
-        if(p_orders->inside[p_floor->current]||p_orders->up[p_floor->current]){  //denna seksjonen e stygg, pls fiks, den e her for å fikse det som skjer hvis man trykke på samme etasje
+        if(p_orders->inside[p_floor->current]||p_orders->up[p_floor->current]){    //all these extra ifs is because of the stop button
             if(hardware_read_floor_sensor(p_floor->current)){
-                p_orders->endstation = p_floor->current; //denne er unødvendig tror jeg, siden den allerede er på current_endstation. test å ta det bort senere. fuck emergency stop
+                p_orders->endstation = p_floor->current; 
                 return stop_up_state;
             }
             else if(p_floor->above){return moving_down_state;} 
                 else {return moving_up_state;}
         }
         if(p_orders->down[p_floor->current]){
-            if(hardware_read_floor_sensor(p_floor->current)){ //trenger ikke denne ifen av samme grunn som else foran. ops den trengs pga emergency stop
-                p_orders->endstation = p_floor->current;  // trenger ikke, tror den trengs pga emergency stop
+            if(hardware_read_floor_sensor(p_floor->current)){ 
+                p_orders->endstation = p_floor->current;  
                 return stop_down_state;
             }
-            else{ //denne else trenger ikke å være her, fordi den ikke kan bevege seg da vi fjerner etterpå. eller jo! den trengs pra emergency stop
+            else{ 
                 if(p_floor->above){return moving_down_state;}
                 else {return moving_up_state;}
             }
-        }                                                       //stygg til hit
+        }                                                      
 
 
         for(int f = 0; f < p_floor->current; f++){

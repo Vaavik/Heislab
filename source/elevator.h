@@ -28,7 +28,7 @@ int idle(Orders * p_orders, Floor * p_floor);
 /**
  * @brief The moving up/down state. Sets the motor to move up or down depending on the direction @p direction (up=1, down=0).
  * Continously updates orders and checks if it is on a floor with an order (ignoring orders of oposite direction @p direction) or the endstation is reached.
- * If any of the above conditions are met, the state @c stop_up or @c stop_down depending on the direction @p direction.
+ * If any of the above conditions are met, the state @c stop_up_state or @c stop_down_state depending on the direction @p direction.
  * If the stop button is pressed, the state @c stop_state is returned.
  * 
  * @param p_orders A pointer to the orders struct in use.
