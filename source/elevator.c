@@ -126,10 +126,7 @@ int stop(Orders * p_orders, Floor * p_floor, bool direction){
         HARDWARE_ORDER_INSIDE,
         HARDWARE_ORDER_DOWN
     };
-    for(int i = 0; i < 3; i++){
-        HardwareOrder order_type = order_types[i];
-        orders_clear(p_orders, p_floor->current, order_type);
-    }
+
 
     hardware_command_door_open(1);  //åpner døra her
     int sec = 0, trigger = 3;       //timer 3 sek
@@ -140,6 +137,10 @@ int stop(Orders * p_orders, Floor * p_floor, bool direction){
 
 
         orders_update(p_orders, direction);            //tar imot ordre samtidig
+        for(int i = 0; i < 3; i++){
+            HardwareOrder order_type = order_types[i];
+            orders_clear(p_orders, p_floor->current, order_type);
+        }
         if(hardware_read_obstruction_signal()){  //Resetter timeren når obstruction er på
             before = clock();
         }
